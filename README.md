@@ -1,1 +1,2 @@
-# Ian's nano blog framework
+# Bloggo
+_ An Ultralight Static Blogging Framework _ 
