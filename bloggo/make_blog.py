@@ -4,6 +4,9 @@ import markdown
 import time
 import shutil
 import jinja2
+from post import Post
+from config import templateEnv
+
 
 def clean_output_dir():
     output_dir = "./generated/"
@@ -20,12 +23,9 @@ def clean_output_dir():
 
 blogs = glob.glob("./blogs/*.md")
 blog_html = []
+posts = []
 
 clean_output_dir()
-
-templateLoader = jinja2.FileSystemLoader(searchpath="./templates/")
-templateEnv = jinja2.Environment(loader=templateLoader)
-
 
 print(f"Copying static files...")
 static_files = glob.glob("./templates/*.css")
@@ -34,27 +34,34 @@ for static_file in static_files:
     shutil.copyfile(static_file, './generated/' + filename)
 
 
-for blog in list(sorted(blogs, key=lambda x: os.path.getctime(x))):
-    filename = '/'.join(blog.split("/")[2:]).split('.')[0]
-    created_d = time.ctime(os.path.getctime(blog))
-    modified_d = time.ctime(os.path.getmtime(blog))
+for post_file in list(sorted(blogs, key=lambda x: os.path.getctime(x))):
+    # filename = '/'.join(blog.split("/")[2:]).split('.')[0]
+    # created_d = time.ctime(os.path.getctime(blog))
+    # modified_d = time.ctime(os.path.getmtime(blog))
 
-    with open(blog, 'r') as f:
-        html = markdown.markdown(f.read())
+    post = Post(post_file)
+    posts.append(post)
 
-    blog_html.append(html)
+    # with open(blog, 'r') as f:
+    #     html = markdown.markdown(f.read())
 
-    html_filename = "./generated/" + filename + '.htm'
+    blog_html.append(post.body_html)
+
+    html_filename = "./generated/" + post.nice_filename + '.htm'
     print(f"Generating {html_filename}")
     with open(html_filename, 'w') as f:
         # f.write(html)
-        f.write(templateEnv.get_template('base.htm').render(title="text", content=html))
+        f.write(templateEnv.get_template('base.htm').render(title="Bloggo", content=post.get_html()))
 
 print(f"Generating index.")
 
 with open('./generated/index.htm', 'w') as f:
-    for html in blog_html:
-        f.write(html)
-        f.write("<hr>")
+    # for html in blog_html:
+    #     f.write(html)
+    #     f.write("<hr>")
+    
+    content = templateEnv.get_template('list.htm').render(posts=[post.get_html() for post in posts])
+
+    f.write(templateEnv.get_template('base.htm').render(title="Bloggo", content=content))
 
 print("Done!")
