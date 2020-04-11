@@ -1,2 +1,2 @@
 # Bloggo
-_ An Ultralight Static Blogging Framework _ 
+_An Ultralight Static Blogging Framework_ 
