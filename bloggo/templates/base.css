@@ -5,11 +5,18 @@ body {
 .content {
     background-color: #fff;
     margin: auto;
-    max-width: 500px;
+    max-width: 600px;
     padding: 20px;
     border-radius: 2px;
 }
 .timestamp {
     color: #555;
     font-size: small;
+}
+.header {
+    max-width: 600px;
+    margin: auto;
+    padding-bottom: 20px;
+    padding-top: 5px;
+    font-size: 20px;
 }
