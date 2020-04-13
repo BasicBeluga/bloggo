@@ -53,7 +53,7 @@ for static_file in static_files:
     filename = static_file.split("/")[-1]
     shutil.copyfile(static_file, './generated/' + filename)
 
-for post_file in list(sorted(blogs, key=lambda x: git_modified_times.get(x, 0))):
+for post_file in list(sorted(blogs, key=lambda x: -git_modified_times.get(x, 0))):
     if post_file in git_modified_times:
         modified = datetime.datetime.fromtimestamp(git_modified_times[post_file])
     else:
@@ -66,7 +66,7 @@ for post_file in list(sorted(blogs, key=lambda x: git_modified_times.get(x, 0)))
     blog_html.append(post.body_html)
 
     html_filename = "./generated/" + post.nice_filename + '.htm'
-    print(f"Generating {html_filename}", git_modified_times[post_file])
+    print(f"Generating {html_filename}")
     with open(html_filename, 'w') as f:
         f.write(templateEnv.get_template('base.htm').render(title="Bloggo", content=post.get_html()))
 
