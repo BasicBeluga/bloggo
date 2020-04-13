@@ -6,14 +6,21 @@ from config import templateEnv
 
 
 class Post():
-    def __init__(self, filename):
+    def __init__(self, filename, created=None, modified=None):
         with open(filename, 'r') as f:
             self.body_html = markdown.markdown(f.read())
 
         self.nice_filename = '/'.join(filename.split("/")[2:]).split('.')[0]
 
-        self.created = time.ctime(os.path.getctime(filename))
-        self.modified = time.ctime(os.path.getmtime(filename))
+        if created:
+            self.created = created
+        else:
+            self.created = time.ctime(os.path.getctime(filename))
+        
+        if modified:
+            self.modified = modified
+        else:
+            self.modified = time.ctime(os.path.getmtime(filename))
 
 
     def get_html(self):

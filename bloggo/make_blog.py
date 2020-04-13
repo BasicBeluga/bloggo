@@ -1,4 +1,5 @@
 import os
+import datetime
 import glob
 import markdown
 import time
@@ -36,7 +37,7 @@ def get_files_from_git():
         commit=next(repo.iter_commits(paths=blob.path))
 
         path = "." + blob.path[6:] if blob.path[:6] == 'bloggo' else blob.path
-        files[path] =  commit.committed_date
+        files[path] = commit.committed_date
 
     return files
 
@@ -53,7 +54,13 @@ for static_file in static_files:
     shutil.copyfile(static_file, './generated/' + filename)
 
 for post_file in list(sorted(blogs, key=lambda x: git_modified_times.get(x, 0))):
-    post = Post(post_file)
+    if x in git_modified_times:
+        modified = datetime.datetime.fromtimestamp(git_modified_times[x])
+    else:
+        modified = None
+
+    post = Post(post_file, modified=modified)
+
     posts.append(post)
 
     blog_html.append(post.body_html)
