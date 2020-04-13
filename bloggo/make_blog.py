@@ -4,9 +4,10 @@ import markdown
 import time
 import shutil
 import jinja2
-from post import Post
-from config import templateEnv
+import git
 
+from config import templateEnv
+from post import Post
 
 def clean_output_dir():
     output_dir = "./generated/"
@@ -27,41 +28,45 @@ posts = []
 
 clean_output_dir()
 
+
+def get_files_from_git():
+    repo = git.Repo('..')
+    files = {} 
+    for blob in repo.tree().traverse():
+        commit=next(repo.iter_commits(paths=blob.path))
+
+        path = "." + blob.path[6:] if blob.path[:6] == 'bloggo' else blob.path
+        files[path] =  commit.committed_date
+
+    return files
+
+git_modified_times = get_files_from_git()
+
+print(git_modified_times)
+print(blogs)
+
 print(f"Copying static files...")
 static_files = glob.glob("./templates/*.css")
+
 for static_file in static_files:
     filename = static_file.split("/")[-1]
     shutil.copyfile(static_file, './generated/' + filename)
 
-
-for post_file in list(sorted(blogs, key=lambda x: os.path.getctime(x))):
-    # filename = '/'.join(blog.split("/")[2:]).split('.')[0]
-    # created_d = time.ctime(os.path.getctime(blog))
-    # modified_d = time.ctime(os.path.getmtime(blog))
-
+for post_file in list(sorted(blogs, key=lambda x: git_modified_times.get(x, 0))):
     post = Post(post_file)
     posts.append(post)
-
-    # with open(blog, 'r') as f:
-    #     html = markdown.markdown(f.read())
 
     blog_html.append(post.body_html)
 
     html_filename = "./generated/" + post.nice_filename + '.htm'
-    print(f"Generating {html_filename}")
+    print(f"Generating {html_filename}", git_modified_times[post_file])
     with open(html_filename, 'w') as f:
-        # f.write(html)
         f.write(templateEnv.get_template('base.htm').render(title="Bloggo", content=post.get_html()))
 
 print(f"Generating index.")
 
 with open('./generated/index.htm', 'w') as f:
-    # for html in blog_html:
-    #     f.write(html)
-    #     f.write("<hr>")
-    
     content = templateEnv.get_template('list.htm').render(posts=[post.get_html() for post in posts])
-
     f.write(templateEnv.get_template('base.htm').render(title="Bloggo", content=content))
 
 print("Done!")
