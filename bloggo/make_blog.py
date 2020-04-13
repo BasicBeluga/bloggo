@@ -54,8 +54,8 @@ for static_file in static_files:
     shutil.copyfile(static_file, './generated/' + filename)
 
 for post_file in list(sorted(blogs, key=lambda x: git_modified_times.get(x, 0))):
-    if x in git_modified_times:
-        modified = datetime.datetime.fromtimestamp(git_modified_times[x])
+    if post_file in git_modified_times:
+        modified = datetime.datetime.fromtimestamp(git_modified_times[post_file])
     else:
         modified = None
 
